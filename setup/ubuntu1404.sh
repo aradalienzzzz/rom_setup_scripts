@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
-# Copyright � 2015-2016, Akhil Narang "akhilnarang" <akhilnarang.1999@gmail.com>
+# Copyright � 2015-2017, Akhil Narang "akhilnarang" <akhilnarang.1999@gmail.com>
 #
 # This software is licensed under the terms of the GNU General Public
 # License version 2, as published by the Free Software Foundation, and
@@ -16,14 +16,15 @@
 
 clear
 echo Installing Dependencies!
-sudo apt update -y
-sudo apt install git-core python gnupg flex bison gperf libsdl1.2-dev libesd0-dev \
+sudo apt-add-repository ppa:openjdk-r/ppa -y
+sudo apt-get update
+sudo apt-get -y install git-core python gnupg flex bison gperf libsdl1.2-dev libesd0-dev libwxgtk2.8-dev \
 squashfs-tools build-essential zip curl libncurses5-dev zlib1g-dev openjdk-8-jre openjdk-8-jdk pngcrush \
 schedtool libxml2 libxml2-utils xsltproc lzop libc6-dev schedtool g++-multilib lib32z1-dev lib32ncurses5-dev \
 gcc-multilib liblz4-* pngquant ncurses-dev texinfo gcc gperf patch libtool \
-automake g++ gawk subversion expat libexpat1-dev python-all-dev bc libcloog-isl-dev \
+automake g++ gawk subversion expat libexpat1-dev python-all-dev binutils-static bc libcloog-isl-dev \
 libcap-dev autoconf libgmp-dev build-essential gcc-multilib g++-multilib pkg-config libmpc-dev libmpfr-dev lzma* \
-liblzma* w3m android-tools-adb maven ncftp htop -y
+liblzma* w3m android-tools-adb maven ncftp figlet imagemagick
 echo Dependencies have been installed
 echo repo has been Downloaded!
 if [ ! "$(which adb)" == "" ];
@@ -37,15 +38,20 @@ adb kill-server
 sudo killall adb
 fi
 
-makeversion=$(make -v | head -1 | awk '{print $3}')
-if [ ! "${makeversion}" == "3.81" ];
-then
-echo "Installing make 3.81 instead of ${makeversion}"
-sudo install utils/make /usr/bin/
+if [ -d "utils" ]; then
+	if [ "$(command -v make)" ]; then
+		makeversion="$(make -v | head -1 | awk '{print $3}')";
+		if [ "${makeversion}" != "4.2.1" ]; then
+			echo "Installing make 4.2.1 instead of ${makeversion}";
+			sudo install utils/make /usr/local/bin/;
+		fi
+	fi
+	echo "Installing repo";
+	sudo install utils/repo /usr/local/bin/;
+	echo "Installing ccache 3.3.4, please make sure your ROM includes the commit to use host ccache";
+	sudo install utils/ccache /usr/local/bin/;
+	echo "Installing ninja 1.7.2, please make sure your ROM includes the commit to use host ninja";
+	sudo install utils/ninja /usr/local/bin/;
+else
+	echo "Please run the script from root of cloned repo!";
 fi
-echo "Installing repo"
-sudo install utils/repo /usr/bin/
-echo "Installing ccache"
-sudo install utils/ccache /usr/bin/
-echo "Installing ninja 1.7.2, please make sure your ROM includes the commit to use host ninja"
-sudo install utils/ninja /usr/bin/

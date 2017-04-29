@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
-# Copyright � 2015-2016, Akhil Narang "akhilnarang" <akhilnarang.1999@gmail.com>
+# Copyright � 2015-2017, Akhil Narang "akhilnarang" <akhilnarang.1999@gmail.com>
 #
 # This software is licensed under the terms of the GNU General Public
 # License version 2, as published by the Free Software Foundation, and
@@ -24,7 +24,7 @@ schedtool libxml2 libxml2-utils xsltproc lzop libc6-dev schedtool g++-multilib l
 gcc-multilib liblz4-* pngquant ncurses-dev texinfo gcc gperf patch libtool \
 automake g++ gawk subversion expat libexpat1-dev python-all-dev binutils-static bc libcloog-isl-dev \
 libcap-dev autoconf libgmp-dev build-essential gcc-multilib g++-multilib pkg-config libmpc-dev libmpfr-dev lzma* \
-liblzma* w3m android-tools-adb maven ncftp figlet
+liblzma* w3m android-tools-adb maven ncftp figlet imagemagick
 echo Dependencies have been installed
 echo repo has been Downloaded!
 if [ ! "$(which adb)" == "" ];
@@ -38,8 +38,20 @@ adb kill-server
 sudo killall adb
 fi
 
-echo "Installing repo"
-sudo install utils/repo /usr/bin/
-echo "Installing ccache"
-sudo install utils/ccache /usr/bin/
-
+if [ -d "utils" ]; then
+	if [ "$(command -v make)" ]; then
+		makeversion="$(make -v | head -1 | awk '{print $3}')";
+		if [ "${makeversion}" != "4.2.1" ]; then
+			echo "Installing make 4.2.1 instead of ${makeversion}";
+			sudo install utils/make /usr/local/bin/;
+		fi
+	fi
+	echo "Installing repo";
+	sudo install utils/repo /usr/local/bin/;
+	echo "Installing ccache 3.3.4, please make sure your ROM includes the commit to use host ccache";
+	sudo install utils/ccache /usr/local/bin/;
+	echo "Installing ninja 1.7.2, please make sure your ROM includes the commit to use host ninja";
+	sudo install utils/ninja /usr/local/bin/;
+else
+	echo "Please run the script from root of cloned repo!";
+fi
